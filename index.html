@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Marisqueira App</title>
+  <style>
+    :root {
+      --bg: #fafafa; --fg: #333;
+      --primary: #007acc; --secondary: #d32f2f; --terciary: #555;
+      --light-bg: #ffffff;
+      --dark-bg: #1e1e1e; --dark-fg: #ddd;
+    }
+    [data-theme="dark"] {
+      --bg: var(--dark-bg);
+      --fg: var(--dark-fg);
+      --light-bg: #2e2e2e;
+    }
+    body {
+      margin: 0; padding: 0;
+      font-family: "Segoe UI", sans-serif;
+      background: var(--bg); color: var(--fg);
+    }
+    header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 1.5rem; background: var(--terciary); color: white;
+    }
+    header h1 { margin: 0; font-size: 1.5rem; }
+    header button { background: transparent; border: none; color: white; cursor: pointer; font-size: 1.2rem; }
+    main { padding: 1.5rem; }
+    .hidden { display: none !important; }
+    input, button, select { font-size: 1rem; }
+    button, select { cursor: pointer; border-radius: 4px; border: none; padding: .6rem 1rem; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-secondary { background: var(--secondary); color: white; }
+    .mesa-list { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit,minmax(150px,1fr)); }
+    .mesa-item, .category-btn, .sub-btn, .item-btn {
+      background: var(--light-bg); color: var(--fg);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      padding: 1rem; border-radius: 6px;
+    }
+    .cartao-btn {
+      background: var(--primary);
+      color: white;
+      padding: 1rem;
+      font-size: 1.2rem;
+      border-radius: 50%;
+      width: 60px; height: 60px;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .cartao-btn:hover {
+      background: var(--secondary);
+      transform: scale(1.1);
+    }
+    .category-btn, .sub-btn, .item-btn { margin: .3rem; }
+    .category-btn:hover, .sub-btn:hover { background: var(--secondary); color: white; }
+    .item-btn:hover { background: var(--primary); color: white; }
+    .order-item { display: flex; justify-content: space-between; background: var(--light-bg); padding: .5rem; border-radius:4px; margin-bottom:.4rem; }
+    /* modais */
+    .modal-backdrop {
+      position: fixed; top: 0; left: 0; right:0; bottom:0;
+      background: rgba(0,0,0,0.4); display: flex; align-items: center;
+      justify-content: center; z-index: 1000;
+    }
+    .modal {
+      background: var(--light-bg); color: var(--fg);
+      padding: 1.5rem; border-radius: 8px;
+      width: 90%; max-width: 400px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .modal h3 { margin-top:0; }
+    .modal input[type=number] { width: 96%; padding: .5rem; margin: .5rem 0; border:1px solid #ccc; border-radius:4px; }
+    .modal button, .modal select { width: 100%; margin-top: .5rem; }
+    @media (max-width: 600px) {
+      .category-btn, .item-btn { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>App Café</h1>
+    <div>
+      <button id="themeToggle">🌙</button>
+      <button class="hidden" id="perfilBtn">👤 Perfil</button>
+    </div>
+  </header>
+
+  <div id="loginView" style="padding:2rem; text-align:center;">
+    <h2>Escolha seu Cartão</h2>
+    <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:1rem; margin-bottom:2rem;">
+      <!-- Botões de cartões -->
+      <button class="cartao-btn" onclick="selecionarCartao('1')">1</button>
+      <button class="cartao-btn" onclick="selecionarCartao('2')">2</button>
+      <button class="cartao-btn" onclick="selecionarCartao('3')">3</button>
+      <button class="cartao-btn" onclick="selecionarCartao('4')">4</button>
+      <button class="cartao-btn" onclick="selecionarCartao('5')">5</button>
+      <button class="cartao-btn" onclick="selecionarCartao('6')">6</button>
+    </div>
+
+    <div id="senhaContainer" style="display:none;">
+      <h3>Insira a Senha do Cartão <span id="cartaoSelecionado"></span></h3>
+      <input type="password" id="senhaInput" placeholder="Senha" style="padding:0.5rem; font-size:1.2rem; width:60%; max-width:200px;" /><br><br>
+      <button class="btn-primary" onclick="fazerLogin()">Entrar</button>
+      <p id="loginErro" style="color:red;"></p>
+    </div>
+  </div>
+
+
+  <main id="appView" class="hidden">
+    <section id="mesaListView">
+      <div style="margin-bottom:1rem;">
+        <button class="btn-primary" onclick="novaMesa()">+ Nova Mesa</button>
+        <button class="btn-secondary" onclick="encerrarTurno()">Encerrar Turno</button>
+      </div>
+      <div class="mesa-list" id="mesasContainer"></div>
+    </section>
+
+    <section id="mesaDetailView" class="hidden">
+      <button onclick="voltarMesas()">← Mesas</button>
+      <h2>Mesa <span id="mesaNumero"></span></h2>
+      <div class="categories" id="categories"></div>
+      <div id="items" style="margin-top:1rem;"></div>
+      <h3 style="margin-top:1.5rem;">Pedidos</h3>
+      <div id="ordersContainer"></div>
+      <div style="margin-top:1rem;">
+        <button class="btn-primary" onclick="abrirPagamento()">Pagar Conta</button>
+        <button class="btn-primary" onclick="abrirDivisao()">Dividir Conta</button>
+        <button class="btn-secondary" onclick="excluirMesa()">Excluir Mesa</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modais -->
+  <div id="modalContainer"></div>
+  <div id="divisaoModal" class="modal-backdrop hidden">
+    <div class="modal" style="max-height: 90vh; overflow-y: auto;">
+      <h3>Dividir Conta</h3>
+      <div id="divisaoEtapa"></div>
+      <button onclick="fecharDivisao()">Fechar</button>
+    </div>
+  </div>
+
+  <script>
+    // ========== Dados ==========
+    const usuarios = [{num:"1",nome:"Garçom 1",pass:"1"},
+                      {num:"2",nome:"Garçom 2",pass:"2"},
+                      {num:"3",nome:"Garçom 3",pass:"3"},
+                      {num:"4",nome:"Garçom 4",pass:"4"},
+                      {num:"5",nome:"Garçom 5",pass:"5"},
+                      {num:"6",nome:"Rian",pass:"6"}];
+                      
+    const data = { cafe: { items: {'cafe':0.9,'descafeinado':0.9,'pingo':0.8,'pingo direto':0.9,'cevada':0.8,'pingo de cevada':0.8,'meia de leite':1.3,'meia de leite direta':1.3,'galao':1.3}},
+                   cerveja: { items:{'lata':1.4}, subcategories:{ garrafa:{ items:{'cerveja branca':1.4,'cerveja preta':1.4,'cerveja(a)':1.5}},
+                                    pressao:{ items:{'fino':1.2,'panache':1.2,'tango':1.5,'lambreta':1.2}}} },
+                   bebidas:{ items:{'Compal':1.5,'IceTea':1.5,'Pepsi':1.5,'Cola':1.5}},
+                   'bebidas brancas':{ subcategories:{ aguardente:{ items:{'1/2 bagaço':1.3}}, cocktals:{ items:{'caipirinha':5.0}}, brandlys:{ items:{'1/2 macieira':2.0}}}},
+                   snackbar:{ items:{'torrada':1.3,'tremocos':0.7,'amendoins':0.7,'meia torrada':1.0,'rissole pequeno':1.2,'rissole grande':1.5}},
+                   vinhos:{ items:{ branco:1.0, porto:1.0, 'taça grande':1.5}} };
+
+    // ========== Estado ==========
+    let usuarioLogado = null;
+    let mesas = JSON.parse(localStorage.getItem("mesas")||"[]");
+    let perfis = JSON.parse(localStorage.getItem("perfis")||"{}");
+    let mesaAtual = null;
+    let currentCat = null, currentSub = null;
+
+    // ========== Tema ==========
+    const themeToggle = document.getElementById("themeToggle");
+    themeToggle.onclick = ()=> {
+      const html = document.documentElement;
+      const newTheme = html.getAttribute("data-theme")==="dark"?"light":"dark";
+      html.setAttribute("data-theme", newTheme);
+      localStorage.setItem("theme", newTheme);
+      themeToggle.textContent = newTheme==="dark" ? "🌞" : "🌙";
+    };
+    const savedTheme = localStorage.getItem("theme")||"light";
+    document.documentElement.setAttribute("data-theme", savedTheme);
+    themeToggle.textContent = savedTheme==="dark"?"🌞":"🌙";
+
+    // ========== Sessão ==========
+    const uNum = perfis.loggedUser;
+    if (uNum) {
+      const u = usuarios.find(x => x.num === uNum);
+      if (u) {
+        usuarioLogado = u;
+        mostrarApp();
+      }
+    }
+
+
+    function mostrarApp() {
+      document.getElementById("telaLogin").style.display = "none";
+      document.getElementById("telaApp").style.display = "flex";
+    }
+
+
+
+    function salvarTudo() {
+      localStorage.setItem("mesas", JSON.stringify(mesas));
+      localStorage.setItem("perfis", JSON.stringify(perfis));
+    }
+
+    // ========== Login / Turno ==========
+    let cartaoEscolhido = null;
+
+    function selecionarCartao(num) {
+      cartaoEscolhido = num;
+      document.getElementById("cartaoSelecionado").textContent = num;
+      document.getElementById("senhaContainer").style.display = "block";
+    }
+
+    function fazerLogin() {
+      const s = document.getElementById("senhaInput").value.trim();
+      const u = usuarios.find(u => u.num === cartaoEscolhido && u.pass === s);
+      if (!u) {
+        document.getElementById("loginErro").textContent = "Senha incorreta.";
+        return;
+      }
+
+      usuarioLogado = u;
+      perfis.loggedUser = u.num;
+      if (!perfis[u.num]) {
+        perfis[u.num] = {
+          nome: u.nome, mesasAtendidas: 0, gorjetas: 0, vendas: 0,
+          entrada: new Date().toISOString(), saida: null
+        };
+      }
+      salvarTudo();
+      mostrarApp();
+    }
+
+
+
+    function encerrarTurno() {
+      if (!usuarioLogado) return;
+
+      const p = perfis[usuarioLogado.num];
+      const agora = new Date();
+
+      const entrada = new Date(p.entrada);
+      const saida = agora;
+      const diffMs = saida - entrada;
+      const diffMinTotal = Math.floor(diffMs / 60000);
+      const horas = Math.floor(diffMinTotal / 60);
+      const minutos = diffMinTotal % 60;
+
+      const ent = entrada.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const sai = saida.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const duracao = `${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}`;
+
+      const resumo = `Turno encerrado de ${p.nome}\n` +
+                    `Entrada: ${ent}\n` +
+                    `Saída: ${sai}\n` +
+                    `Horas: ${duracao}\n` +
+                    `Mesas atendidas: ${p.mesasAtendidas}\n` +
+                    `Gorjetas: €${p.gorjetas.toFixed(2)}\n` +
+                    `Vendas: €${p.vendas.toFixed(2)}`;
+
+      alert(resumo);
+
+      // Limpa o perfil e faz logout
+      delete perfis[usuarioLogado.num];
+      delete perfis.loggedUser;
+      usuarioLogado = null;
+      salvarTudo();
+
+      // Volta à tela de login
+      document.getElementById("appView").classList.add("hidden");
+      document.getElementById("loginView").classList.remove("hidden");
+      document.getElementById("senhaContainer").style.display = "none";
+      document.getElementById("senhaInput").value = "";
+    }
+
+    // ========== UI Inicial ==========
+    function mostrarApp() {
+      document.getElementById("loginView").classList.add("hidden");
+      document.getElementById("appView").classList.remove("hidden");
+      document.getElementById("perfilBtn").classList.remove("hidden");
+      document.getElementById("perfilBtn").onclick = mostrarPerfil;
+      renderMesas();
+    }
+
+    // ========== Mesas ==========
+    function renderMesas(){
+      const container = document.getElementById("mesasContainer");
+      container.innerHTML = "";
+      mesas.forEach(m=>{
+        const total = m.pedidos.reduce((a,p)=>a+p.price,0).toFixed(2);
+        const gar = usuarios.find(u=>u.num===m.garcomId)?.nome||"Desconhecido";
+        const div = document.createElement("div");
+        div.className = "mesa-item";
+        div.innerHTML = `<strong>Mesa ${m.id}</strong><br>Garçom: ${gar}<br>Total: €${total}`;
+        div.onclick = ()=> abrirMesa(m.id);
+        container.appendChild(div);
+      });
+    }
+
+    function novaMesa(){
+      if (!usuarioLogado) return alert("Faça login primeiro.");
+      const inpt = prompt("Digite nº da mesa:");
+      const n = parseInt(inpt,10);
+      if (!n||n<1) return alert("Número inválido.");
+      const id = n<10?`0${n}`:`${n}`;
+      if (mesas.some(m=>m.id===id)) return alert("Mesa já existe.");
+      mesas.push({ id, garcomId:usuarioLogado.num, pedidos:[] });
+      salvarTudo(); renderMesas();
+    }
+
+    function abrirMesa(id){
+      mesaAtual = mesas.find(m=>m.id===id);
+      if (!mesaAtual) return;
+      document.getElementById("mesaListView").classList.add("hidden");
+      document.getElementById("mesaDetailView").classList.remove("hidden");
+      document.getElementById("mesaNumero").textContent = mesaAtual.id;
+      currentCat = null; currentSub = null;
+      renderCategories(); renderItems(); renderOrders();
+    }
+
+    function voltarMesas(){
+      mesaAtual = null;
+      document.getElementById("mesaDetailView").classList.add("hidden");
+      document.getElementById("mesaListView").classList.remove("hidden");
+      renderMesas();
+    }
+
+    function excluirMesa(){
+      if (!mesaAtual) return;
+      if (mesaAtual.garcomId !== usuarioLogado.num) return alert("Somente o criador pode excluir.");
+      if (mesaAtual.pedidos.length>0) return alert("Não pode excluir com pedidos.");
+      if (!confirm(`Excluir mesa ${mesaAtual.id}?`)) return;
+      mesas = mesas.filter(m=>m.id!==mesaAtual.id);
+      salvarTudo(); voltarMesas();
+    }
+
+    // ========== Categorias / Itens ==========
+    function renderCategories(){
+      const div = document.getElementById("categories");
+      div.innerHTML = "";
+      Object.keys(data).forEach(cat=>{
+        const btn = document.createElement("button");
+        btn.className = "category-btn";
+        btn.textContent = cat;
+        btn.onclick = ()=> { currentCat=cat; currentSub=null; renderItems(); };
+        div.appendChild(btn);
+      });
+    }
+
+    function renderItems(){
+      const div = document.getElementById("items");
+      div.innerHTML = "";
+      if (!currentCat) return;
+      const cat = data[currentCat];
+      if (cat.subcategories) {
+        Object.keys(cat.subcategories).forEach(sub=>{
+          const sb = document.createElement("button");
+          sb.className = "sub-btn";
+          sb.textContent = sub;
+          sb.onclick = ()=> { currentSub=sub; renderItems(); };
+          div.appendChild(sb);
+        });
+      }
+      const itens = currentSub ? data[currentCat].subcategories[currentSub].items
+                                : data[currentCat].items;
+      Object.entries(itens).forEach(([name, price])=>{
+        const ib = document.createElement("button");
+        ib.className = "item-btn";
+        ib.textContent = `${name} – €${price.toFixed(2)}`;
+        ib.onclick = ()=> {
+          if (!mesaAtual || mesaAtual.garcomId !== usuarioLogado.num) return alert("Sem permissão.");
+          mesaAtual.pedidos.push({ name, price, status: "fazendo" });
+          mesaAtual.status = "fazendo";
+          salvarTudo(); renderOrders();
+        };
+        div.appendChild(ib);
+      });
+    }
+
+    function renderOrders(){
+      const cont = document.getElementById("ordersContainer");
+      cont.innerHTML = "";
+      mesaAtual.pedidos.forEach((p,i)=>{
+        const d = document.createElement("div"); d.className="order-item";
+        d.innerHTML = `${p.name} – €${p.price.toFixed(2)} [${p.status}]` +
+          (mesaAtual.garcomId===usuarioLogado.num ?
+          `
+          <div>
+            <button class="btn-secondary" style="margin-left:0.5rem;" onclick="removeItem()">▬</button>
+            <select onchange="alterarStatusPedido(${i}, this.value)">
+              <option value="aguardando" ${p.status==="aguardando"?"selected":""}>Aguardando</option>
+              <option value="fazendo" ${p.status==="fazendo"?"selected":""}>Fazendo</option>
+              <option value="entregue" ${p.status==="entregue"?"selected":""}>Entregue</option>
+            </select>
+          </div>` : "");
+        cont.appendChild(d);
+      });
+      if (mesaAtual.pedidos.every(p => p.status === "entregue")) {
+        mesaAtual.status = "concluída";
+      } else if (mesaAtual.pedidos.some(p => p.status === "aguardando")) {
+        mesaAtual.status = "aguardando";
+      } else {
+        mesaAtual.status = "fazendo";
+      }
+      salvarTudo();
+    }
+
+    function alterarStatusPedido(i, novoStatus) {
+      if (!mesaAtual || mesaAtual.garcomId !== usuarioLogado.num) return;
+      mesaAtual.pedidos[i].status = novoStatus;
+      salvarTudo();
+      renderOrders();
+    }
+
+    function removeItem(i){
+      if (!mesaAtual || mesaAtual.garcomId !== usuarioLogado.num) return alert("Sem permissão.");
+      if (i<0 || i>=mesaAtual.pedidos.length) return;
+      mesaAtual.pedidos.splice(i, 1);
+      if (mesaAtual.pedidos.length===0) mesaAtual.status = "aguardando";
+      salvarTudo(); renderOrders();
+    }
+
+    // ========== Modal Dinâmico ==========
+    function showModal(contentHtml) {
+      const container = document.getElementById("modalContainer");
+      container.innerHTML = `
+        <div class="modal-backdrop">
+          <div class="modal">${contentHtml}</div>
+        </div>`;
+    }
+    function closeModal() {
+      document.getElementById("modalContainer").innerHTML = "";
+    }
+
+    // ========== Pagamento ==========
+    function abrirPagamento(){
+      if (!mesaAtual || mesaAtual.garcomId !== usuarioLogado.num) return alert("Sem permissão para realizar o pagamento.");
+      if (!mesaAtual || mesaAtual.pedidos.length===0) return alert("Nenhum pedido nesta mesa.");
+      // garante que todos pedidos entregues
+      if (mesaAtual.pedidos.some(p=>p.status!=="entregue")) return alert("Todos os pedidos devem estar com status entregue.");
+      const total = mesaAtual.pedidos.reduce((a,p)=>a+p.price, 0);
+      const html = `
+        <h3>Pagar Conta - Total: €${total.toFixed(2)}</h3>
+        <h3 id="trocoInfo"></h3>
+        <input type="number" id="valorPago" placeholder="Valor pago (€)" step="0.01" />
+        <button onclick="calcularETrocar()">Calcular Troco</button>
+        <button onclick="finalizarPagamento()">Confirmar Pagamento</button>
+        <button onclick="closeModal()">Fechar</button>
+      `;
+      showModal(html);
+    }
+
+    function calcularETrocar(){
+      const inp = document.getElementById("valorPago");
+      const info = document.getElementById("trocoInfo");
+      const total = mesaAtual.pedidos.reduce((a,p)=>a+p.price, 0);
+      const v = parseFloat(inp.value);
+      if (isNaN(v)) { info.textContent = "Valor inválido."; info.style.color="red"; return; }
+      const diff = v - total;
+      if (diff < 0) {
+        info.textContent = `Faltam €${Math.abs(diff).toFixed(2)}`; info.style.color="red";
+      } else {
+        info.textContent = `Troco: €${diff.toFixed(2)}`; info.style.color="#00ff00";
+      }
+    }
+
+    function finalizarPagamento(){
+      const inp = document.getElementById("valorPago");
+      const total = mesaAtual.pedidos.reduce((a,p)=>a+p.price, 0);
+      const v = parseFloat(inp.value) || total;
+      if (v < total) return alert("Valor insuficiente.");
+      const troco = +(v - total).toFixed(2);
+      if (!confirm(`Total: €${total.toFixed(2)}\nPago: €${v.toFixed(2)}\nTroco: €${troco.toFixed(2)}\nConfirmar?`)) return;
+      const p = perfis[usuarioLogado.num];
+      p.mesasAtendidas +=1; p.vendas += total;
+      // gorjeta = troco opcional
+      const gor = prompt(`Troco disponível: €${troco.toFixed(2)}\nQuanto deseja deixar de gorjeta?`, "0");
+      const gg = parseFloat(gor);
+      if (!isNaN(gg) && gg>0 && gg<=troco) { p.gorjetas += gg; }
+      delete perfis.loggedUser; salvarTudo();
+      alert("PagamenTo finalizado. Obrigado!");
+      mesas = mesas.filter(m=>m.id!==mesaAtual.id);
+      salvarTudo();
+      closeModal();
+      location.reload();
+    }
+
+    // ========== Perfil ==========
+    function mostrarPerfil() {
+      const pf = perfis[usuarioLogado.num];
+      const entrada = new Date(pf.entrada);
+      const saida = pf.saida ? new Date(pf.saida) : new Date();
+
+      const ent = entrada.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const sai = pf.saida
+        ? saida.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        : "Turno em aberto";
+
+      const diffMs = saida - entrada;
+      const totalMin = Math.floor(diffMs / 60000);
+      const horas = Math.floor(totalMin / 60);
+      const minutos = totalMin % 60;
+      const duracao = `${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}`;
+
+      alert(`Perfil: ${pf.nome}
+    Entrada: ${ent}
+    Saída: ${sai}
+    Horas: ${duracao}
+    Mesas atendidas: ${pf.mesasAtendidas}
+    Gorjetas: €${pf.gorjetas.toFixed(2)}`);
+    }
+
+
+    let clientesDivisao = [];
+    let pedidosRestantes = [];
+
+    function abrirDivisao() {
+      if (!mesaAtual || mesaAtual.garcomId !== usuarioLogado.num) return alert("Sem permissão para realizar o pagamento.");
+      if (!mesaAtual || mesaAtual.pedidos.length === 0) {
+        alert("Nenhum pedido nesta mesa.");
+        return;
+      }
+
+      if (mesaAtual.pedidos.some(p => p.status !== "entregue")) {
+        alert("Todos os pedidos devem estar com status 'entregue'.");
+        return;
+      }
+
+      clientesDivisao = [];
+      pedidosRestantes = [...mesaAtual.pedidos];
+      document.getElementById("divisaoModal").classList.remove("hidden");
+      proximaEtapaCliente();
+    }
+
+    function proximaEtapaCliente() {
+      const div = document.getElementById("divisaoEtapa");
+      div.innerHTML = '';
+
+      if (pedidosRestantes.length === 1) {
+        const ultimoCliente = clientesDivisao.length;
+        clientesDivisao[ultimoCliente] = [pedidosRestantes[0]];
+        pedidosRestantes = [];
+        mostrarResultadoDivisao();
+        return;
+      }
+
+      const clienteNum = clientesDivisao.length + 1;
+      const titulo = document.createElement("p");
+      titulo.textContent = `Cliente ${clienteNum} - Escolha os itens que ele vai pagar:`;
+      div.appendChild(titulo);
+
+      const itensSelecionados = [];
+
+      pedidosRestantes.forEach((pedido, i) => {
+        const btn = document.createElement("button");
+        btn.textContent = `${pedido.name} (€${pedido.price.toFixed(2)})`;
+        btn.style.margin = "0.3rem";
+        btn.onclick = () => {
+          btn.disabled = true;
+          btn.style.opacity = 0.5;
+          itensSelecionados.push(pedido);
+        };
+        div.appendChild(btn);
+      });
+
+      const proxBtn = document.createElement("button");
+      proxBtn.textContent = "Próximo cliente";
+      proxBtn.style.display = "block";
+      proxBtn.style.marginTop = "1rem";
+      proxBtn.onclick = () => {
+        itensSelecionados.forEach(p => {
+          const idx = pedidosRestantes.indexOf(p);
+          if (idx > -1) pedidosRestantes.splice(idx, 1);
+        });
+
+        clientesDivisao.push(itensSelecionados);
+        if (pedidosRestantes.length === 0) {
+          mostrarResultadoDivisao();
+        } else {
+          proximaEtapaCliente();
+        }
+      };
+
+      div.appendChild(proxBtn);
+    }
+
+    function mostrarResultadoDivisao() {
+      const div = document.getElementById("divisaoEtapa");
+      div.innerHTML = '<h3>Resumo por Cliente:</h3>';
+
+      clientesDivisao.forEach((pedidos, i) => {
+        const clienteDiv = document.createElement("div");
+        clienteDiv.style.marginBottom = "1.5rem";
+        const total = pedidos.reduce((sum, p) => sum + p.price, 0);
+
+        const titulo = document.createElement("p");
+        titulo.textContent = `Cliente ${i + 1}: €${total.toFixed(2)}`;
+        clienteDiv.appendChild(titulo);
+
+        pedidos.forEach(p => {
+          const item = document.createElement("p");
+          item.style.margin = "0 0 0.2rem 1rem";
+          item.textContent = `• ${p.name} - €${p.price.toFixed(2)}`;
+          clienteDiv.appendChild(item);
+        });
+
+        const pagoInput = document.createElement("input");
+        pagoInput.type = "number";
+        pagoInput.placeholder = "Valor pago (€)";
+        pagoInput.style.marginRight = "0.5rem";
+        pagoInput.min = 0;
+        pagoInput.step = "0.01";
+
+        const trocoOutput = document.createElement("span");
+
+        const calcularBtn = document.createElement("button");
+        calcularBtn.textContent = "Calcular troco";
+        calcularBtn.onclick = () => {
+          const valorPago = parseFloat(pagoInput.value);
+          if (isNaN(valorPago)) {
+            trocoOutput.textContent = " ➜ Valor inválido.";
+            trocoOutput.style.color = "red";
+            return;
+          }
+          const troco = valorPago - total;
+          if (troco < 0) {
+            trocoOutput.textContent = ` ➜ Falta €${Math.abs(troco).toFixed(2)}`;
+            trocoOutput.style.color = "red";
+            trocoOutput.style.fontWeight = "bold";
+          } else {
+            trocoOutput.textContent = ` ➜ Troco: €${troco.toFixed(2)}`;
+            trocoOutput.style.color = "#00ff00";
+            trocoOutput.style.fontWeight = "bold";
+          }
+        };
+
+        clienteDiv.appendChild(trocoOutput);
+        clienteDiv.appendChild(pagoInput);
+        clienteDiv.appendChild(calcularBtn);
+        
+        div.appendChild(clienteDiv);
+      });
+    }
+
+    function fecharDivisao() {
+      document.getElementById("divisaoModal").classList.add("hidden");
+    }
+  </script>
+</body>
+</html>
