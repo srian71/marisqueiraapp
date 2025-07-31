@@ -80,7 +80,7 @@
 </head>
 <body>
   <header>
-    <h1>App Café</h1>
+    <h1>Marisqueira App</h1>
     <div>
       <button id="themeToggle">🌙</button>
       <button class="hidden" id="perfilBtn">👤 Perfil</button>
@@ -477,7 +477,7 @@
       const gor = prompt(`Troco disponível: €${troco.toFixed(2)}\nQuanto deseja deixar de gorjeta?`, "0");
       const gg = parseFloat(gor);
       if (!isNaN(gg) && gg>0 && gg<=troco) { p.gorjetas += gg; }
-      delete perfis.loggedUser; salvarTudo();
+      salvarTudo();
       alert("PagamenTo finalizado. Obrigado!");
       mesas = mesas.filter(m=>m.id!==mesaAtual.id);
       salvarTudo();
