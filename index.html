@@ -80,7 +80,7 @@
 </head>
 <body>
   <header>
-    <h1>Marisqueira App</h1>
+    <h1>App Café</h1>
     <div>
       <button id="themeToggle">🌙</button>
       <button class="hidden" id="perfilBtn">👤 Perfil</button>
@@ -223,7 +223,7 @@
       perfis.loggedUser = u.num;
       if (!perfis[u.num]) {
         perfis[u.num] = {
-          nome: u.nome, mesasAtendidas: 0, gorjetas: 0, vendas: 0,
+          nome: u.nome, mesasAtendidas: 0, gorjetas: 0,
           entrada: new Date().toISOString(), saida: null
         };
       }
@@ -255,8 +255,7 @@
                     `Saída: ${sai}\n` +
                     `Horas: ${duracao}\n` +
                     `Mesas atendidas: ${p.mesasAtendidas}\n` +
-                    `Gorjetas: €${p.gorjetas.toFixed(2)}\n` +
-                    `Vendas: €${p.vendas.toFixed(2)}`;
+                    `Gorjetas: €${p.gorjetas.toFixed(2)}`;
 
       alert(resumo);
 
@@ -472,11 +471,11 @@
       const troco = +(v - total).toFixed(2);
       if (!confirm(`Total: €${total.toFixed(2)}\nPago: €${v.toFixed(2)}\nTroco: €${troco.toFixed(2)}\nConfirmar?`)) return;
       const p = perfis[usuarioLogado.num];
-      p.mesasAtendidas +=1; p.vendas += total;
+      p.mesasAtendidas +=1;
       // gorjeta = troco opcional
       const gor = prompt(`Troco disponível: €${troco.toFixed(2)}\nQuanto deseja deixar de gorjeta?`, "0");
       const gg = parseFloat(gor);
-      if (!isNaN(gg) && gg>0 && gg<=troco) { p.gorjetas += gg; }
+      p.gorjetas += gg;
       salvarTudo();
       alert("PagamenTo finalizado. Obrigado!");
       mesas = mesas.filter(m=>m.id!==mesaAtual.id);
