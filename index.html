@@ -6,75 +6,231 @@
   <title>Marisqueira App</title>
   <style>
     :root {
-      --bg: #fafafa; --fg: #333;
-      --primary: #007acc; --secondary: #d32f2f; --terciary: #555;
-      --light-bg: #ffffff;
-      --dark-bg: #1e1e1e; --dark-fg: #ddd;
+      --bg: #f9f9f9;
+      --fg: #2b2b2b;
+      --primary: #0077cc;
+      --secondary: #e53935;
+      --tertiary: #4a4a4a;
+      --accent: #ff9800;
+      --light-bg: #fff;
+      --card-shadow: rgba(0, 0, 0, 0.1);
+      --dark-bg: #1e1e1e;
+      --dark-fg: #e0e0e0;
+      --text-color: #000000;
+      --status: #555; /* Cor para status de pedidos */
     }
+
     [data-theme="dark"] {
       --bg: var(--dark-bg);
       --fg: var(--dark-fg);
-      --light-bg: #2e2e2e;
+      --light-bg: #2c2c2c;
+      --text-color: #ffffff;
     }
+
     body {
-      margin: 0; padding: 0;
-      font-family: "Segoe UI", sans-serif;
-      background: var(--bg); color: var(--fg);
+      margin: 0;
+      font-family: "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
     }
+
     header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 1rem 1.5rem; background: var(--terciary); color: white;
+      background: var(--tertiary);
+      color: white;
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px var(--card-shadow);
     }
-    header h1 { margin: 0; font-size: 1.5rem; }
-    header button { background: transparent; border: none; color: white; cursor: pointer; font-size: 1.2rem; }
-    main { padding: 1.5rem; }
-    .hidden { display: none !important; }
-    input, button, select { font-size: 1rem; }
-    button, select { cursor: pointer; border-radius: 4px; border: none; padding: .6rem 1rem; }
-    .btn-primary { background: var(--primary); color: white; }
-    .btn-secondary { background: var(--secondary); color: white; }
-    .mesa-list { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit,minmax(150px,1fr)); }
-    .mesa-item, .category-btn, .sub-btn, .item-btn {
-      background: var(--light-bg); color: var(--fg);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      padding: 1rem; border-radius: 6px;
+
+    header h1 {
+      margin: 0;
+      font-size: 1.5rem;
     }
+
+    header button {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.3rem;
+      cursor: pointer;
+    }
+
+    main {
+      padding: 2rem 1.5rem;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    button,
+    select,
+    input {
+      font-size: 1rem;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+
+    button,
+    select {
+      padding: 0.6rem 1.2rem;
+      border: none;
+      cursor: pointer;
+    }
+
+    input[type="password"],
+    input[type="number"] {
+      padding: 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #005fa3;
+    }
+
+    .btn-secondary {
+      background: var(--secondary);
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background: #c62828;
+    }
+
+    .mesa-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 1rem;
+    }
+
+    .mesa-item,
+    .category-btn,
+    .sub-btn,
+    .item-btn {
+      background: var(--light-bg);
+      color: var(--text-color);
+      border-radius: 8px;
+      padding: 1rem;
+      box-shadow: 0 2px 6px var(--card-shadow);
+    }
+
+    .mesa-item {
+      border-left: 6px solid var(--status);
+    }
+
+    .category-btn,
+    .sub-btn,
+    .item-btn {
+      margin: 0.3rem;
+    }
+
+    .category-btn:hover,
+    .sub-btn:hover {
+      background: var(--secondary);
+      color: white;
+    }
+
+    .item-btn:hover {
+      background: var(--primary);
+      color: white;
+    }
+
     .cartao-btn {
       background: var(--primary);
       color: white;
-      padding: 1rem;
+      width: 60px;
+      height: 60px;
       font-size: 1.2rem;
       border-radius: 50%;
-      width: 60px; height: 60px;
       border: none;
       cursor: pointer;
-      transition: transform 0.2s;
+      box-shadow: 0 3px 6px var(--card-shadow);
+      transition: transform 0.2s, background 0.3s;
     }
+
     .cartao-btn:hover {
       background: var(--secondary);
-      transform: scale(1.1);
+      transform: scale(1.05);
     }
-    .category-btn, .sub-btn, .item-btn { margin: .3rem; }
-    .category-btn:hover, .sub-btn:hover { background: var(--secondary); color: white; }
-    .item-btn:hover { background: var(--primary); color: white; }
-    .order-item { display: flex; justify-content: space-between; background: var(--light-bg); padding: .5rem; border-radius:4px; margin-bottom:.4rem; }
-    /* modais */
+
+    .order-item {
+      background: var(--light-bg);
+      color: var(--text-color);
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+      border-radius: 6px;
+      display: flex;
+      justify-content: space-between;
+      box-shadow: 0 2px 4px var(--card-shadow);
+    }
+
     .modal-backdrop {
-      position: fixed; top: 0; left: 0; right:0; bottom:0;
-      background: rgba(0,0,0,0.4); display: flex; align-items: center;
-      justify-content: center; z-index: 1000;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
     }
+
     .modal {
-      background: var(--light-bg); color: var(--fg);
-      padding: 1.5rem; border-radius: 8px;
-      width: 90%; max-width: 400px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      background: var(--light-bg);
+      color: var(--text-color);
+      color: var(--fg);
+      padding: 2rem;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 420px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
     }
-    .modal h3 { margin-top:0; }
-    .modal input[type=number] { width: 96%; padding: .5rem; margin: .5rem 0; border:1px solid #ccc; border-radius:4px; }
-    .modal button, .modal select { width: 100%; margin-top: .5rem; }
+
+    .modal h3 {
+      margin-top: 0;
+      margin-bottom: 1rem;
+    }
+
+    .modal input[type="number"] {
+      width: 95%;
+      margin-bottom: 1rem;
+    }
+
+    .modal button {
+      width: 100%;
+      margin-top: 0.5rem;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
     @media (max-width: 600px) {
-      .category-btn, .item-btn { width: 100%; }
+      header h1 {
+        font-size: 1.2rem;
+      }
+
+      .category-btn,
+      .item-btn,
+      .sub-btn {
+        width: 100%;
+      }
+
+      .cartao-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 1rem;
+      }
+
+      main {
+        padding: 1rem;
+      }
     }
   </style>
 </head>
@@ -189,14 +345,6 @@
       }
     }
 
-
-    function mostrarApp() {
-      document.getElementById("telaLogin").style.display = "none";
-      document.getElementById("telaApp").style.display = "flex";
-    }
-
-
-
     function salvarTudo() {
       localStorage.setItem("mesas", JSON.stringify(mesas));
       localStorage.setItem("perfis", JSON.stringify(perfis));
@@ -282,19 +430,36 @@
     }
 
     // ========== Mesas ==========
-    function renderMesas(){
-      const container = document.getElementById("mesasContainer");
-      container.innerHTML = "";
-      mesas.forEach(m=>{
-        const total = m.pedidos.reduce((a,p)=>a+p.price,0).toFixed(2);
-        const gar = usuarios.find(u=>u.num===m.garcomId)?.nome||"Desconhecido";
-        const div = document.createElement("div");
-        div.className = "mesa-item";
-        div.innerHTML = `<strong>Mesa ${m.id}</strong><br>Garçom: ${gar}<br>Total: €${total}`;
-        div.onclick = ()=> abrirMesa(m.id);
-        container.appendChild(div);
-      });
-    }
+    function renderMesas() {
+  const container = document.getElementById("mesasContainer");
+  container.innerHTML = "";
+
+  mesas.forEach(m => {
+    const total = m.pedidos.reduce((a, p) => a + p.price, 0).toFixed(2);
+    const gar = usuarios.find(u => u.num === m.garcomId)?.nome || "Desconhecido";
+
+    const div = document.createElement("div");
+    div.className = "mesa-item";
+    div.innerHTML = `
+      <strong>Mesa ${m.id}</strong><br>
+      Garçom: ${gar}<br>
+      Total: €${total}<br>
+      Status: ${m.status || "aguardando"}
+    `;
+
+    // Define cor de status por mesa individual
+    const statusColor = {
+      "concluída": "#38b556",
+      "fazendo": "#f7ca3b",
+      "aguardando": "#555"
+    }[m.status] || "#555";
+
+    div.style.setProperty('--status', statusColor); // Aplica no estilo da div da mesa
+
+    div.onclick = () => abrirMesa(m.id);
+    container.appendChild(div);
+  });
+}
 
     function novaMesa(){
       if (!usuarioLogado) return alert("Faça login primeiro.");
@@ -324,27 +489,113 @@
       renderMesas();
     }
 
-    function excluirMesa(){
+    function excluirMesa() {
       if (!mesaAtual) return;
-      if (mesaAtual.garcomId !== usuarioLogado.num) return alert("Somente o criador pode excluir.");
-      if (mesaAtual.pedidos.length>0) return alert("Não pode excluir com pedidos.");
-      if (!confirm(`Excluir mesa ${mesaAtual.id}?`)) return;
-      mesas = mesas.filter(m=>m.id!==mesaAtual.id);
-      salvarTudo(); voltarMesas();
+
+      if (mesaAtual.garcomId !== usuarioLogado.num) {
+        alert("Somente o criador pode excluir.");
+        return;
+      }
+
+      if (mesaAtual.pedidos.length > 0) {
+        alert("Não pode excluir com pedidos.");
+        return;
+      }
+
+      if (!confirm(`Resetar mesa ${mesaAtual.id}?`)) return;
+
+      // Reseta a mesa ao invés de remover
+      mesaAtual.status = "aguardando";
+      mesaAtual.garcomId = null;
+      mesaAtual.pedidos = [];
+
+      // Remove a mesa da lista
+      mesas = mesas.filter(m => m.id !== mesaAtual.id);
+
+      salvarTudo();
+      voltarMesas();
     }
+
 
     // ========== Categorias / Itens ==========
     function renderCategories(){
       const div = document.getElementById("categories");
       div.innerHTML = "";
-      Object.keys(data).forEach(cat=>{
-        const btn = document.createElement("button");
-        btn.className = "category-btn";
-        btn.textContent = cat;
-        btn.onclick = ()=> { currentCat=cat; currentSub=null; renderItems(); };
-        div.appendChild(btn);
+
+      Object.keys(data).forEach(cat => {
+        const catBtn = document.createElement("button");
+        catBtn.className = "category-btn";
+        catBtn.textContent = cat;
+        catBtn.onclick = () => {
+          const el = document.getElementById(`cat-${cat}`);
+          el.classList.toggle("hidden");
+        };
+        div.appendChild(catBtn);
+
+        // contêiner para subcategorias/itens
+        const catContainer = document.createElement("div");
+        catContainer.id = `cat-${cat}`;
+        catContainer.className = "hidden";
+        catContainer.style.marginLeft = "1rem";
+
+        // render subcategorias se existirem
+        const c = data[cat];
+        if (c.subcategories) {
+          Object.keys(c.subcategories).forEach(sub => {
+            const subBtn = document.createElement("button");
+            subBtn.className = "sub-btn";
+            subBtn.textContent = sub;
+            subBtn.onclick = () => {
+              const el = document.getElementById(`sub-${cat}-${sub}`);
+              el.classList.toggle("hidden");
+            };
+            catContainer.appendChild(subBtn);
+
+            // contêiner para itens da subcategoria
+            const subDiv = document.createElement("div");
+            subDiv.id = `sub-${cat}-${sub}`;
+            subDiv.className = "hidden";
+            subDiv.style.marginLeft = "1rem";
+
+            Object.entries(c.subcategories[sub].items).forEach(([name, price]) => {
+              const ib = document.createElement("button");
+              ib.className = "item-btn";
+              ib.textContent = `${name} – €${price.toFixed(2)}`;
+              ib.onclick = () => adicionarItem(name, price);
+              subDiv.appendChild(ib);
+            });
+
+            catContainer.appendChild(subDiv);
+          });
+        }
+
+        // render itens diretos da categoria
+        if (c.items) {
+          const itemsDiv = document.createElement("div");
+          itemsDiv.style.marginTop = "0.5rem";
+
+          Object.entries(c.items).forEach(([name, price]) => {
+            const ib = document.createElement("button");
+            ib.className = "item-btn";
+            ib.textContent = `${name} – €${price.toFixed(2)}`;
+            ib.onclick = () => adicionarItem(name, price);
+            itemsDiv.appendChild(ib);
+          });
+
+          catContainer.appendChild(itemsDiv);
+        }
+
+        div.appendChild(catContainer);
       });
     }
+
+    function adicionarItem(name, price) {
+      if (!mesaAtual || mesaAtual.garcomId !== usuarioLogado.num) return alert("Sem permissão.");
+      mesaAtual.pedidos.push({ name, price, status: "fazendo" });
+      mesaAtual.status = "fazendo";
+      salvarTudo(); renderOrders();
+    }
+
 
     function renderItems(){
       const div = document.getElementById("items");
@@ -365,13 +616,42 @@
       Object.entries(itens).forEach(([name, price])=>{
         const ib = document.createElement("button");
         ib.className = "item-btn";
-        ib.textContent = `${name} – €${price.toFixed(2)}`;
-        ib.onclick = ()=> {
+        const itemDiv = document.createElement("div");
+        itemDiv.style.display = "flex";
+        itemDiv.style.alignItems = "center";
+        itemDiv.style.gap = "8px";
+        itemDiv.style.marginBottom = "6px";
+
+        // botão de adicionar
+        const addBtn = document.createElement("button");
+        addBtn.textContent = "+";
+        addBtn.title = "Adicionar pedido";
+
+        // nome e preço
+        const label = document.createElement("span");
+        label.textContent = `${name} (€${price.toFixed(2)})`;
+
+        // input de quantidade
+        const qtyInput = document.createElement("input");
+        qtyInput.type = "number";
+        qtyInput.min = "1";
+        qtyInput.value = "1";
+        qtyInput.style.width = "45px";
+
+        // ação do botão
+        addBtn.onclick = () => {
           if (!mesaAtual || mesaAtual.garcomId !== usuarioLogado.num) return alert("Sem permissão.");
-          mesaAtual.pedidos.push({ name, price, status: "fazendo" });
+          const qty = parseInt(qtyInput.value) || 1;
+          if (qty < 1) return;
+          mesaAtual.pedidos.push({ name, price, qty, status: "fazendo" });
           mesaAtual.status = "fazendo";
           salvarTudo(); renderOrders();
         };
+
+        itemDiv.appendChild(addBtn);
+        itemDiv.appendChild(label);
+        itemDiv.appendChild(qtyInput);
+        itemsDiv.appendChild(itemDiv);
         div.appendChild(ib);
       });
     }
@@ -381,8 +661,10 @@
       cont.innerHTML = "";
       mesaAtual.pedidos.forEach((p,i)=>{
         const d = document.createElement("div"); d.className="order-item";
-        d.innerHTML = `${p.name} – €${p.price.toFixed(2)} [${p.status}]` +
-          (mesaAtual.garcomId===usuarioLogado.num ?
+        const totalItem = (p.price * (p.qty || 1)).toFixed(2);
+        const qtdText = p.qty > 1 ? ` (${p.qty}x)` : '';
+        d.innerHTML = `${p.name}${qtdText} – €${totalItem} [${p.status}]` +
+        (mesaAtual.garcomId===usuarioLogado.num ?
           `
           <div>
             <button class="btn-secondary" style="margin-left:0.5rem;" onclick="removeItem()">▬</button>
@@ -469,15 +751,15 @@
       const v = parseFloat(inp.value) || total;
       if (v < total) return alert("Valor insuficiente.");
       const troco = +(v - total).toFixed(2);
-      if (!confirm(`Total: €${total.toFixed(2)}\nPago: €${v.toFixed(2)}\nTroco: €${troco.toFixed(2)}\nConfirmar?`)) return;
+      if (!confirm(`Total: €${total.toFixed(2)} |  Pago: €${v.toFixed(2)}\nTroco: €${troco.toFixed(2)}`)) return;
       const p = perfis[usuarioLogado.num];
       p.mesasAtendidas +=1;
       // gorjeta = troco opcional
-      const gor = prompt(`Troco disponível: €${troco.toFixed(2)}\nQuanto deseja deixar de gorjeta?`, "0");
+      const gor = prompt(`Quanto deseja deixar de gorjeta?`, "0");
       const gg = parseFloat(gor);
       p.gorjetas += gg;
       salvarTudo();
-      alert("PagamenTo finalizado. Obrigado!");
+      alert("Pagamento finalizado. Obrigado!");
       mesas = mesas.filter(m=>m.id!==mesaAtual.id);
       salvarTudo();
       closeModal();
@@ -487,6 +769,11 @@
     // ========== Perfil ==========
     function mostrarPerfil() {
       const pf = perfis[usuarioLogado.num];
+      if (!pf) {
+        alert("Perfil não encontrado.");
+        return;
+      }
+
       const entrada = new Date(pf.entrada);
       const saida = pf.saida ? new Date(pf.saida) : new Date();
 
@@ -505,10 +792,9 @@
     Entrada: ${ent}
     Saída: ${sai}
     Horas: ${duracao}
-    Mesas atendidas: ${pf.mesasAtendidas}
-    Gorjetas: €${pf.gorjetas.toFixed(2)}`);
+    Mesas atendidas: ${pf.mesasAtendidas || 0}
+    Gorjetas: €${(pf.gorjetas || 0).toFixed(2)}`);
     }
-
 
     let clientesDivisao = [];
     let pedidosRestantes = [];
@@ -587,9 +873,12 @@
       const div = document.getElementById("divisaoEtapa");
       div.innerHTML = '<h3>Resumo por Cliente:</h3>';
 
+      const clientesData = [];
+
       clientesDivisao.forEach((pedidos, i) => {
         const clienteDiv = document.createElement("div");
         clienteDiv.style.marginBottom = "1.5rem";
+
         const total = pedidos.reduce((sum, p) => sum + p.price, 0);
 
         const titulo = document.createElement("p");
@@ -606,40 +895,136 @@
         const pagoInput = document.createElement("input");
         pagoInput.type = "number";
         pagoInput.placeholder = "Valor pago (€)";
-        pagoInput.style.marginRight = "0.5rem";
+        pagoInput.style.margin = "0.5rem 0.5rem 0.5rem 0";
         pagoInput.min = 0;
         pagoInput.step = "0.01";
 
         const trocoOutput = document.createElement("span");
 
-        const calcularBtn = document.createElement("button");
-        calcularBtn.textContent = "Calcular troco";
-        calcularBtn.onclick = () => {
+        clientesData.push({ pagoInput, trocoOutput, total });
+        let dadosClientes = [];
+
+        clienteDiv.appendChild(pagoInput);
+        clienteDiv.appendChild(trocoOutput);
+        div.appendChild(clienteDiv);
+      });
+
+      // Input único para pagamento total da mesa
+      const pagamentoDiv = document.createElement("div");
+      pagamentoDiv.style.marginTop = "1rem";
+
+      const inputTotalPago = document.createElement("input");
+      inputTotalPago.type = "number";
+      inputTotalPago.id = "valorPago"; // Usado na função finalizarPagamento
+      inputTotalPago.placeholder = "Valor total pago (€)";
+      inputTotalPago.min = 0;
+      inputTotalPago.step = "0.01";
+      inputTotalPago.style.marginRight = "0.5rem";
+
+
+      // Botão Calcular Troco
+      const calcularTodosBtn = document.createElement("button");
+      calcularTodosBtn.textContent = "Calcular troco";
+      calcularTodosBtn.onclick = () => {
+        clientesData.forEach(({ pagoInput, trocoOutput, total }) => {
           const valorPago = parseFloat(pagoInput.value);
           if (isNaN(valorPago)) {
-            trocoOutput.textContent = " ➜ Valor inválido.";
-            trocoOutput.style.color = "red";
-            return;
-          }
-          const troco = valorPago - total;
-          if (troco < 0) {
-            trocoOutput.textContent = ` ➜ Falta €${Math.abs(troco).toFixed(2)}`;
+            trocoOutput.textContent = "";
             trocoOutput.style.color = "red";
             trocoOutput.style.fontWeight = "bold";
           } else {
-            trocoOutput.textContent = ` ➜ Troco: €${troco.toFixed(2)}`;
-            trocoOutput.style.color = "#00ff00";
-            trocoOutput.style.fontWeight = "bold";
+            const troco = valorPago - total;
+            if (troco < 0) {
+              trocoOutput.textContent = ` ➜ Falta €${Math.abs(troco).toFixed(2)}`;
+              trocoOutput.style.color = "red";
+              trocoOutput.style.fontWeight = "bold";
+            } else {
+              trocoOutput.textContent = ` ➜ Troco: €${troco.toFixed(2)}`;
+              trocoOutput.style.color = "#00cc00";
+              trocoOutput.style.fontWeight = "bold";
+            }
           }
-        };
+        });
+      };
 
-        clienteDiv.appendChild(trocoOutput);
-        clienteDiv.appendChild(pagoInput);
-        clienteDiv.appendChild(calcularBtn);
-        
-        div.appendChild(clienteDiv);
-      });
+      pagamentoDiv.appendChild(calcularTodosBtn);
+      dadosClientes = clientesData;
+
+      // Botão Confirmar Pagamento
+      const confirmarBtn = document.createElement("button");
+      confirmarBtn.textContent = "Confirmar pagamento";
+      confirmarBtn.onclick = finalizarPagamentoDividido;
+
+      pagamentoDiv.appendChild(confirmarBtn);
+
+      // Adiciona div de pagamento no final
+      div.appendChild(pagamentoDiv);
     }
+
+    function finalizarPagamentoDividido() {
+  let resumo = "";
+  const gorjetas = [];
+  let totalMesa = 0;
+  let todosPagaram = true;
+
+  for (let i = 0; i < dadosClientes.length; i++) {
+    const { pagoInput, total } = dadosClientes[i];
+    const valorPago = parseFloat(pagoInput.value);
+
+    if (isNaN(valorPago)) {
+      const valorPago = total;
+      if (!confirm(`Cliente ${i + 1} não pagou o valor completo.\nTotal: €${total.toFixed(2)} | Pago: €${valorPago.toFixed(2)}\nConfirma?`)) {
+        return;
+      }
+    }
+
+    if (valorPago < total) {
+      if (!confirm(`Cliente ${i + 1} não pagou o valor completo.\nTotal: €${total.toFixed(2)} | Pago: €${valorPago.toFixed(2)}\nConfirma?`)) {
+        return;
+      }
+    }
+
+    const troco = +(valorPago - total).toFixed(2);
+    totalMesa += total;
+
+    if (troco < 0) {
+      resumo += `Cliente ${i + 1}:\n  Total: €${total.toFixed(2)}\n  Pago: €${valorPago.toFixed(2)}\n  Faltam: €${Math.abs(troco).toFixed(2)}\n\n`;
+      todosPagaram = false;
+      gorjetas.push(0);
+    } else {
+      if (isNaN(valorPago)) {
+        const valorPago = total;
+        const troco = +(valorPago - total).toFixed(2);
+        resumo += `Cliente ${i + 1}:\n  Total: €${total.toFixed(2)}\n  Pago: €${valorPago.toFixed(2)}\n  Troco: €${troco.toFixed(2)}\n\n`;
+      } else {
+        resumo += `Cliente ${i + 1}:\n  Total: €${total.toFixed(2)}\n  Pago: €${valorPago.toFixed(2)}\n  Troco: €${troco.toFixed(2)}\n\n`;
+      }
+
+      const gor = prompt(`Cliente ${i + 1}\nQuanto deseja deixar de gorjeta?`, "0");
+      const gorjeta = parseFloat(gor);
+      gorjetas.push(isNaN(gorjeta) ? 0 : gorjeta);
+    }
+  }
+
+  // Mesmo que alguém tenha pago menos, ainda perguntamos se deseja confirmar
+  if (!confirm(`Resumo do pagamento:\n\n${resumo}${!todosPagaram ? "Atenção: Alguns clientes não pagaram o valor completo.\n\n" : ""}Confirmar pagamento de todos?`)) {
+    return;
+  }
+
+  const perfil = perfis[usuarioLogado.num];
+  perfil.mesasAtendidas += 1;
+
+  const totalGorjetas = gorjetas.reduce((soma, g) => soma + g, 0);
+  perfil.gorjetas += totalGorjetas;
+
+  salvarTudo();
+  alert("Pagamento finalizado. Obrigado!");
+
+  mesas = mesas.filter(m => m.id !== mesaAtual.id);
+  salvarTudo();
+  closeModal();
+  location.reload();
+}
 
     function fecharDivisao() {
       document.getElementById("divisaoModal").classList.add("hidden");
